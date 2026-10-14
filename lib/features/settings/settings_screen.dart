@@ -2,15 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/services/notification_service.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../data/database/debug_seed.dart';
+import '../bills/providers/bill_providers.dart';
 
-class SettingsScreen extends StatefulWidget {
+class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
 
   @override
-  State<SettingsScreen> createState() => _SettingsScreenState();
+  ConsumerState<SettingsScreen> createState() => _SettingsScreenState();
 }
 
-class _SettingsScreenState extends State<SettingsScreen> {
+class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   final _service = NotificationService.instance;
   TimeOfDay _time = const TimeOfDay(hour: 9, minute: 0);
   bool _enabled = true;
@@ -145,6 +149,29 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
             ),
           ),
+            if (kDebugMode) ...[
+            const SizedBox(height: 24),
+            Text('Developer (debug builds only)',
+                style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 8),
+            OutlinedButton.icon(
+              onPressed: () async {
+                await DebugSeed.addSamplePayments();
+                ref.invalidate(billsProvider);
+              },
+              icon: const Icon(Icons.science),
+              label: const Text('Add sample payments'),
+            ),
+            const SizedBox(height: 8),
+            OutlinedButton.icon(
+              onPressed: () async {
+                await DebugSeed.removeSamples();
+                ref.invalidate(billsProvider);
+              },
+              icon: const Icon(Icons.delete_sweep),
+              label: const Text('Remove sample data'),
+            ),
+          ],
         ],
       ),
     );
