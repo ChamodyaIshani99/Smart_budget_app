@@ -9,10 +9,10 @@ import '../../features/splash/splash_screen.dart';
 final appRouter = GoRouter(
   initialLocation: '/',
   routes: [
-    GoRoute(path: '/', builder: (_, __) => const SplashScreen()),
-    GoRoute(path: '/onboarding', builder: (_, __) => const OnboardingScreen()),
-    GoRoute(path: '/home', builder: (_, __) => const MainShell()),
-    GoRoute(path: '/bills/add', builder: (_, __) => const AddEditBillScreen()),
+    GoRoute(path: '/', builder: (_, _) => const SplashScreen()),
+    GoRoute(path: '/onboarding', builder: (_, _) => const OnboardingScreen()),
+    GoRoute(path: '/home', builder: (_, _) => const MainShell()),
+    GoRoute(path: '/bills/add', builder: (_, _) => const AddEditBillScreen()),
     GoRoute(
       path: '/bills/edit',
       builder: (_, state) => AddEditBillScreen(bill: state.extra as Bill?),

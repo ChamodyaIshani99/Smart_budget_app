@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:sqflite/sqflite.dart';
 import 'database_helper.dart';
 
 class DebugSeed {
@@ -10,7 +11,7 @@ class DebugSeed {
     final now = DateTime.now();
 
     Future<void> seed(
-      dynamic txn,
+      Transaction txn,
       Map<String, Object?> cat,
       String currency,
       int months,
@@ -44,7 +45,7 @@ class DebugSeed {
       for (final c in cats.take(5)) {
         await seed(txn, c, 'LKR', 6, 2000, 8000);
       }
-      await seed(txn, cats[4], 'USD', 3, 20, 40); // Internet, USD
+      await seed(txn, cats[4], 'USD', 3, 20, 40); // Internet/Phone in USD
     });
   }
 

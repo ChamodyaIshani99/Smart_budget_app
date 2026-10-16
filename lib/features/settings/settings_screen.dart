@@ -1,9 +1,11 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/constants/app_constants.dart';
+import '../../core/localization/l10n_ext.dart';
+import '../../core/localization/locale_provider.dart';
 import '../../core/services/notification_service.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/database/debug_seed.dart';
 import '../bills/providers/bill_providers.dart';
 
@@ -19,6 +21,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   TimeOfDay _time = const TimeOfDay(hour: 9, minute: 0);
   bool _enabled = true;
   int _pending = 0;
+  String _currency = 'LKR';
 
   @override
   void initState() {
@@ -36,6 +39,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         hour: prefs.getInt(AppConstants.prefReminderHour) ?? 9,
         minute: prefs.getInt(AppConstants.prefReminderMinute) ?? 0,
       );
+      _currency = prefs.getString(AppConstants.prefDefaultCurrency) ?? 'LKR';
       _enabled = enabled;
       _pending = pending;
     });
@@ -48,6 +52,18 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     await prefs.setInt(AppConstants.prefReminderHour, picked.hour);
     await prefs.setInt(AppConstants.prefReminderMinute, picked.minute);
     await _service.rescheduleAll();
+    await _load();
+  }
+
+  Future<void> _setCurrency(String c) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(AppConstants.prefDefaultCurrency, c);
+    ref.invalidate(defaultCurrencyProvider);
+    setState(() => _currency = c);
+  }
+
+  Future<void> _setLanguage(String code) async {
+    await ref.read(localeProvider.notifier).setLanguage(code);
     await _load();
   }
 
@@ -67,27 +83,57 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     await _service.scheduleTestInOneMinute();
     await _load();
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-      content: Text('Scheduled. Close the app and wait about a minute.'),
-    ));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(context.l10n.scheduledSnack)),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final lang = ref.watch(localeProvider).languageCode;
+    final titleStyle = Theme.of(context).textTheme.titleMedium;
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Settings')),
+      appBar: AppBar(title: Text(l10n.navSettings)),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          Text('Reminders', style: Theme.of(context).textTheme.titleMedium),
+          Text(l10n.language, style: titleStyle),
+          const SizedBox(height: 8),
+          SegmentedButton<String>(
+            segments: const [
+              ButtonSegment(value: 'en', label: Text('English')),
+              ButtonSegment(value: 'si', label: Text('සිංහල')),
+            ],
+            selected: {lang},
+            onSelectionChanged: (s) => _setLanguage(s.first),
+          ),
+          const SizedBox(height: 8),
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.payments_outlined),
+              title: Text(l10n.defaultCurrency),
+              trailing: DropdownButton<String>(
+                value: _currency,
+                underline: const SizedBox.shrink(),
+                items: AppConstants.currencies
+                    .map((c) => DropdownMenuItem(value: c, child: Text(c)))
+                    .toList(),
+                onChanged: (v) => _setCurrency(v!),
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
+          Text(l10n.reminders, style: titleStyle),
           const SizedBox(height: 8),
           Card(
             child: Column(
               children: [
                 ListTile(
                   leading: const Icon(Icons.access_time),
-                  title: const Text('Reminder time'),
-                  subtitle: const Text('Time of day reminders are sent'),
+                  title: Text(l10n.reminderTime),
+                  subtitle: Text(l10n.reminderTimeHint),
                   trailing: Text(_time.format(context),
                       style: const TextStyle(fontWeight: FontWeight.bold)),
                   onTap: _pickTime,
@@ -101,21 +147,18 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     color: _enabled ? Colors.green : Colors.red,
                   ),
                   title: Text(
-                      _enabled ? 'Notifications are on' : 'Notifications are off'),
-                  subtitle: _enabled
-                      ? null
-                      : const Text(
-                          'If the dialog does not appear, enable them in phone '
-                          'Settings > Apps > Smart Budget > Notifications.'),
+                      _enabled ? l10n.notificationsOn : l10n.notificationsOff),
+                  subtitle: _enabled ? null : Text(l10n.notificationsOffHint),
                   trailing: _enabled
                       ? null
                       : TextButton(
-                          onPressed: _askPermission, child: const Text('Allow')),
+                          onPressed: _askPermission,
+                          child: Text(l10n.allow)),
                 ),
                 const Divider(height: 1),
                 ListTile(
                   leading: const Icon(Icons.schedule),
-                  title: const Text('Scheduled reminders'),
+                  title: Text(l10n.scheduledReminders),
                   trailing: Text('$_pending',
                       style: const TextStyle(fontWeight: FontWeight.bold)),
                 ),
@@ -123,36 +166,30 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ),
           ),
           const SizedBox(height: 24),
-          Text('Test', style: Theme.of(context).textTheme.titleMedium),
+          Text(l10n.testSection, style: titleStyle),
           const SizedBox(height: 8),
           OutlinedButton.icon(
             onPressed: _testNow,
             icon: const Icon(Icons.notifications),
-            label: const Text('Send test notification now'),
+            label: Text(l10n.sendTestNow),
           ),
           const SizedBox(height: 8),
           OutlinedButton.icon(
             onPressed: _testScheduled,
             icon: const Icon(Icons.timer),
-            label: const Text('Schedule a test (about 1 minute)'),
+            label: Text(l10n.scheduleTest),
           ),
           const SizedBox(height: 24),
           Card(
             color: Theme.of(context).colorScheme.surfaceContainerHighest,
-            child: const Padding(
-              padding: EdgeInsets.all(16),
-              child: Text(
-                'Tip: some phones (Huawei, Xiaomi, Oppo, Vivo, Samsung) stop '
-                'background apps to save battery, which can delay reminders. '
-                'If reminders do not arrive, allow Smart Budget to run in the '
-                'background in your phone\'s battery settings.',
-              ),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Text(l10n.batteryTip),
             ),
           ),
-            if (kDebugMode) ...[
+          if (kDebugMode) ...[
             const SizedBox(height: 24),
-            Text('Developer (debug builds only)',
-                style: Theme.of(context).textTheme.titleMedium),
+            Text('Developer (debug builds only)', style: titleStyle),
             const SizedBox(height: 8),
             OutlinedButton.icon(
               onPressed: () async {

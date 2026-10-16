@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import '../../l10n/app_localizations.dart';
 
 String formatMoney(double amount, String currency) {
   final f = NumberFormat.currency(
@@ -44,10 +45,10 @@ int daysUntil(DateTime due) {
       .inDays;
 }
 
-String dueStatusText(DateTime due) {
+String dueStatusText(AppLocalizations l10n, DateTime due) {
   final days = daysUntil(due);
-  if (days < 0) return 'Overdue by ${-days} day${-days == 1 ? '' : 's'}';
-  if (days == 0) return 'Due today';
-  if (days == 1) return 'Due tomorrow';
-  return 'Due in $days days';
+  if (days < 0) return l10n.overdueByDays(-days);
+  if (days == 0) return l10n.dueToday;
+  if (days == 1) return l10n.dueTomorrow;
+  return l10n.dueInDays(days);
 }

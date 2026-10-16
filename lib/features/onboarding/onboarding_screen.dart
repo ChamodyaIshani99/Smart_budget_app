@@ -1,32 +1,32 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/constants/app_constants.dart';
+import '../../core/localization/l10n_ext.dart';
+import '../../core/localization/locale_provider.dart';
 import '../../core/services/notification_service.dart';
+import '../../core/theme/app_colors.dart';
+import '../bills/providers/bill_providers.dart';
 
-class OnboardingScreen extends StatefulWidget {
+class OnboardingScreen extends ConsumerStatefulWidget {
   const OnboardingScreen({super.key});
 
   @override
-  State<OnboardingScreen> createState() => _OnboardingScreenState();
+  ConsumerState<OnboardingScreen> createState() => _OnboardingScreenState();
 }
 
-class _OnboardingScreenState extends State<OnboardingScreen> {
+class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
+  static const _pageCount = 3;
   final _controller = PageController();
   int _page = 0;
-  String _language = 'en';
   String _currency = 'LKR';
-
-  static const _slides = [
-    ('Never miss a bill', 'Get reminders before every due date.', Icons.notifications_active),
-    ('Track your spending', 'See where your money goes each month.', Icons.pie_chart),
-  ];
 
   Future<void> _finish() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(AppConstants.prefOnboardingDone, true);
-    await prefs.setString(AppConstants.prefLanguage, _language);
     await prefs.setString(AppConstants.prefDefaultCurrency, _currency);
+    ref.invalidate(defaultCurrencyProvider);
     await NotificationService.instance.requestPermission();
     if (mounted) context.go('/home');
   }
@@ -39,7 +39,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final total = _slides.length + 1;
+    final l10n = context.l10n;
+    final lastPage = _page == _pageCount - 1;
 
     return Scaffold(
       body: SafeArea(
@@ -50,15 +51,18 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 controller: _controller,
                 onPageChanged: (i) => setState(() => _page = i),
                 children: [
-                  for (final s in _slides) _slide(s.$1, s.$2, s.$3),
-                  _settingsSlide(),
+                  _preferencesPage(),
+                  _introPage(l10n.onboardingTitle1, l10n.onboardingBody1,
+                      Icons.notifications_active),
+                  _introPage(l10n.onboardingTitle2, l10n.onboardingBody2,
+                      Icons.pie_chart),
                 ],
               ),
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: List.generate(
-                total,
+                _pageCount,
                 (i) => AnimatedContainer(
                   duration: const Duration(milliseconds: 250),
                   margin: const EdgeInsets.all(4),
@@ -80,7 +84,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 height: 52,
                 child: FilledButton(
                   onPressed: () {
-                    if (_page == total - 1) {
+                    if (lastPage) {
                       _finish();
                     } else {
                       _controller.nextPage(
@@ -89,7 +93,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       );
                     }
                   },
-                  child: Text(_page == total - 1 ? 'Get Started' : 'Next'),
+                  child: Text(lastPage ? l10n.getStarted : l10n.next),
                 ),
               ),
             ),
@@ -99,48 +103,76 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     );
   }
 
-  Widget _slide(String title, String body, IconData icon) => Padding(
+  Widget _introPage(String title, String body, IconData icon) => Padding(
         padding: const EdgeInsets.all(32),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 120, color: Theme.of(context).colorScheme.primary),
-            const SizedBox(height: 32),
-            Text(title,
-                style: Theme.of(context).textTheme.headlineSmall,
-                textAlign: TextAlign.center),
+            Container(
+              width: 180,
+              height: 180,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: AppColors.heroGradient(context),
+                boxShadow: AppColors.heroShadow,
+              ),
+              child: Icon(icon, size: 84, color: Colors.white),
+            ),
+            const SizedBox(height: 40),
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: Theme.of(context)
+                  .textTheme
+                  .headlineSmall
+                  ?.copyWith(fontWeight: FontWeight.w800),
+            ),
             const SizedBox(height: 12),
-            Text(body, textAlign: TextAlign.center),
+            Text(
+              body,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 16,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
           ],
         ),
       );
 
-  Widget _settingsSlide() => Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text('Choose your preferences',
-                style: Theme.of(context).textTheme.headlineSmall),
-            const SizedBox(height: 24),
-            SegmentedButton<String>(
-              segments: const [
-                ButtonSegment(value: 'en', label: Text('English')),
-                ButtonSegment(value: 'si', label: Text('සිංහල')),
-              ],
-              selected: {_language},
-              onSelectionChanged: (s) => setState(() => _language = s.first),
-            ),
-            const SizedBox(height: 24),
-            DropdownButtonFormField<String>(
-              initialValue: _currency,
-              decoration: const InputDecoration(labelText: 'Default currency'),
-              items: AppConstants.currencies
-                  .map((c) => DropdownMenuItem(value: c, child: Text(c)))
-                  .toList(),
-              onChanged: (v) => setState(() => _currency = v!),
-            ),
-          ],
-        ),
-      );
+  Widget _preferencesPage() {
+    final l10n = context.l10n;
+    final lang = ref.watch(localeProvider).languageCode;
+
+    return Padding(
+      padding: const EdgeInsets.all(32),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(l10n.onboardingPrefsTitle,
+              style: Theme.of(context).textTheme.headlineSmall,
+              textAlign: TextAlign.center),
+          const SizedBox(height: 24),
+          SegmentedButton<String>(
+            segments: const [
+              ButtonSegment(value: 'en', label: Text('English')),
+              ButtonSegment(value: 'si', label: Text('සිංහල')),
+            ],
+            selected: {lang},
+            onSelectionChanged: (s) =>
+                ref.read(localeProvider.notifier).setLanguage(s.first),
+          ),
+          const SizedBox(height: 24),
+          DropdownButtonFormField<String>(
+            initialValue: _currency,
+            decoration: InputDecoration(labelText: l10n.defaultCurrency),
+            items: AppConstants.currencies
+                .map((c) => DropdownMenuItem(value: c, child: Text(c)))
+                .toList(),
+            onChanged: (v) => setState(() => _currency = v!),
+          ),
+        ],
+      ),
+    );
+  }
 }

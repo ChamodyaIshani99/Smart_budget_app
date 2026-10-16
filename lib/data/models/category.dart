@@ -28,4 +28,7 @@ class Category {
         'icon': icon,
         'color': color,
       };
+
+  String nameFor(String languageCode) =>
+      languageCode == 'si' ? nameSi : nameEn;
 }

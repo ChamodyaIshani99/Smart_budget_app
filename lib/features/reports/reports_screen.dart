@@ -2,6 +2,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import '../../core/localization/l10n_ext.dart';
 import '../../core/utils/helpers.dart';
 import '../../data/repositories/report_repository.dart';
 import '../bills/providers/bill_providers.dart';
@@ -15,7 +16,7 @@ class ReportsScreen extends ConsumerWidget {
     final currenciesAsync = ref.watch(paymentCurrenciesProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Reports')),
+      appBar: AppBar(title: Text(context.l10n.navReports)),
       body: currenciesAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('Error: $e')),
@@ -42,11 +43,11 @@ class _EmptyReports extends StatelessWidget {
             Icon(Icons.pie_chart_outline,
                 size: 96, color: Theme.of(context).colorScheme.primary),
             const SizedBox(height: 16),
-            Text('No payments yet',
+            Text(context.l10n.noPaymentsTitle,
                 style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 8),
-            const Text(
-              'Mark a bill as paid and your spending charts will appear here.',
+            Text(
+              context.l10n.noPaymentsBody,
               textAlign: TextAlign.center,
             ),
           ],
@@ -97,7 +98,7 @@ class _ReportBody extends ConsumerWidget {
           ),
         ],
         const SizedBox(height: 16),
-        Text('Spending by category',
+        Text(context.l10n.spendingByCategory,
             style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 8),
         Card(
@@ -115,8 +116,8 @@ class _ReportBody extends ConsumerWidget {
                     padding: const EdgeInsets.symmetric(vertical: 32),
                     child: Center(
                       child: Text(
-                        'No $currency payments in '
-                        '${DateFormat.yMMMM().format(month)}.',
+                        context.l10n.noPaymentsInMonth(
+                            currency, DateFormat.yMMMM().format(month)),
                         textAlign: TextAlign.center,
                       ),
                     ),
@@ -128,7 +129,7 @@ class _ReportBody extends ConsumerWidget {
           ),
         ),
         const SizedBox(height: 24),
-        Text('Last 6 months ($currency)',
+        Text(context.l10n.last6Months(currency),
             style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 8),
         Card(
@@ -219,8 +220,9 @@ class _CategorySection extends StatelessWidget {
               Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text('Total',
-                      style: TextStyle(color: Colors.grey, fontSize: 12)),
+                  Text(context.l10n.total,
+                      style:
+                          const TextStyle(color: Colors.grey, fontSize: 12)),
                   SizedBox(
                     width: 100,
                     child: FittedBox(
@@ -247,9 +249,9 @@ class _CategorySection extends StatelessWidget {
               child: Icon(categoryIcon(i.category.icon),
                   size: 18, color: Color(i.category.color)),
             ),
-            title: Text(i.category.nameEn),
+            title: Text(i.category.nameFor(context.langCode)),
             subtitle: Text(
-              '${i.count} payment${i.count == 1 ? '' : 's'} • '
+              '${context.l10n.paymentsCount(i.count)} • '
               '${(i.total / total * 100).toStringAsFixed(0)}%',
             ),
             trailing: Text(
@@ -306,7 +308,9 @@ class _MonthlyBars extends StatelessWidget {
                 reservedSize: 30,
                 getTitlesWidget: (value, meta) {
                   final i = value.toInt();
-                  if (i < 0 || i >= items.length) return const SizedBox.shrink();
+                  if (i < 0 || i >= items.length) {
+                    return const SizedBox.shrink();
+                  }
                   return Padding(
                     padding: const EdgeInsets.only(top: 8),
                     child: Text(

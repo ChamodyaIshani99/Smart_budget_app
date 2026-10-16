@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/constants/app_constants.dart';
+import '../../core/localization/l10n_ext.dart';
 import '../../core/utils/helpers.dart';
 import '../../data/models/bill.dart';
 import 'providers/bill_providers.dart';
@@ -104,7 +105,9 @@ class _AddEditBillScreenState extends ConsumerState<AddEditBillScreen> {
     final categories = ref.watch(categoriesProvider).value ?? const [];
 
     return Scaffold(
-      appBar: AppBar(title: Text(_isEdit ? 'Edit bill' : 'Add bill')),
+      appBar: AppBar(
+        title: Text(_isEdit ? context.l10n.editBill : context.l10n.addBill),
+      ),
       body: Form(
         key: _formKey,
         child: ListView(
@@ -113,9 +116,9 @@ class _AddEditBillScreenState extends ConsumerState<AddEditBillScreen> {
             TextFormField(
               controller: _title,
               textCapitalization: TextCapitalization.sentences,
-              decoration: const InputDecoration(labelText: 'Bill name'),
+              decoration: InputDecoration(labelText: context.l10n.billName),
               validator: (v) =>
-                  (v == null || v.trim().isEmpty) ? 'Enter a name' : null,
+                  (v == null || v.trim().isEmpty) ? context.l10n.enterName : null,
             ),
             const SizedBox(height: 16),
             Row(
@@ -127,11 +130,13 @@ class _AddEditBillScreenState extends ConsumerState<AddEditBillScreen> {
                     controller: _amount,
                     keyboardType:
                         const TextInputType.numberWithOptions(decimal: true),
-                    decoration: const InputDecoration(labelText: 'Amount'),
+                    decoration: InputDecoration(labelText: context.l10n.amount),
                     validator: (v) {
                       final n =
                           double.tryParse((v ?? '').replaceAll(',', '').trim());
-                      if (n == null || n <= 0) return 'Enter a valid amount';
+                      if (n == null || n <= 0) {
+                        return context.l10n.enterValidAmount;
+                      }
                       return null;
                     },
                   ),
@@ -142,7 +147,8 @@ class _AddEditBillScreenState extends ConsumerState<AddEditBillScreen> {
                   child: DropdownButtonFormField<String>(
                     key: ValueKey(_currency),
                     initialValue: _currency,
-                    decoration: const InputDecoration(labelText: 'Currency'),
+                    decoration:
+                        InputDecoration(labelText: context.l10n.currency),
                     items: AppConstants.currencies
                         .map((c) => DropdownMenuItem(value: c, child: Text(c)))
                         .toList(),
@@ -154,7 +160,7 @@ class _AddEditBillScreenState extends ConsumerState<AddEditBillScreen> {
             const SizedBox(height: 16),
             DropdownButtonFormField<int>(
               initialValue: _categoryId,
-              decoration: const InputDecoration(labelText: 'Category'),
+              decoration: InputDecoration(labelText: context.l10n.category),
               items: categories
                   .map((c) => DropdownMenuItem(
                         value: c.id,
@@ -163,33 +169,38 @@ class _AddEditBillScreenState extends ConsumerState<AddEditBillScreen> {
                             Icon(categoryIcon(c.icon),
                                 color: Color(c.color), size: 20),
                             const SizedBox(width: 10),
-                            Text(c.nameEn),
+                            Text(c.nameFor(context.langCode)),
                           ],
                         ),
                       ))
                   .toList(),
               onChanged: (v) => setState(() => _categoryId = v),
-              validator: (v) => v == null ? 'Select a category' : null,
+              validator: (v) =>
+                  v == null ? context.l10n.selectCategory : null,
             ),
             const SizedBox(height: 16),
             InkWell(
               onTap: _pickDate,
               child: InputDecorator(
-                decoration: const InputDecoration(
-                  labelText: 'Due date',
-                  suffixIcon: Icon(Icons.calendar_today),
+                decoration: InputDecoration(
+                  labelText: context.l10n.dueDate,
+                  suffixIcon: const Icon(Icons.calendar_today),
                 ),
                 child: Text(formatDate(_dueDate)),
               ),
             ),
             const SizedBox(height: 16),
-            const Text('Repeat'),
+            Text(context.l10n.repeat),
             const SizedBox(height: 8),
             SegmentedButton<Recurrence>(
-              segments: const [
-                ButtonSegment(value: Recurrence.none, label: Text('One-time')),
-                ButtonSegment(value: Recurrence.monthly, label: Text('Monthly')),
-                ButtonSegment(value: Recurrence.yearly, label: Text('Yearly')),
+              segments: [
+                ButtonSegment(
+                    value: Recurrence.none, label: Text(context.l10n.oneTime)),
+                ButtonSegment(
+                    value: Recurrence.monthly,
+                    label: Text(context.l10n.monthly)),
+                ButtonSegment(
+                    value: Recurrence.yearly, label: Text(context.l10n.yearly)),
               ],
               selected: {_recurrence},
               onSelectionChanged: (s) => setState(() => _recurrence = s.first),
@@ -197,12 +208,16 @@ class _AddEditBillScreenState extends ConsumerState<AddEditBillScreen> {
             const SizedBox(height: 16),
             DropdownButtonFormField<int>(
               initialValue: _reminderDays,
-              decoration: const InputDecoration(labelText: 'Remind me'),
-              items: const [
-                DropdownMenuItem(value: 0, child: Text('On the due date')),
-                DropdownMenuItem(value: 1, child: Text('1 day before')),
-                DropdownMenuItem(value: 3, child: Text('3 days before')),
-                DropdownMenuItem(value: 7, child: Text('7 days before')),
+              decoration: InputDecoration(labelText: context.l10n.remindMe),
+              items: [
+                DropdownMenuItem(
+                    value: 0, child: Text(context.l10n.onTheDueDate)),
+                DropdownMenuItem(
+                    value: 1, child: Text(context.l10n.daysBefore(1))),
+                DropdownMenuItem(
+                    value: 3, child: Text(context.l10n.daysBefore(3))),
+                DropdownMenuItem(
+                    value: 7, child: Text(context.l10n.daysBefore(7))),
               ],
               onChanged: (v) => setState(() => _reminderDays = v!),
             ),
@@ -210,8 +225,8 @@ class _AddEditBillScreenState extends ConsumerState<AddEditBillScreen> {
             TextFormField(
               controller: _notes,
               maxLines: 3,
-              decoration: const InputDecoration(
-                labelText: 'Notes (optional)',
+              decoration: InputDecoration(
+                labelText: context.l10n.notesOptional,
                 alignLabelWithHint: true,
               ),
             ),
@@ -220,7 +235,8 @@ class _AddEditBillScreenState extends ConsumerState<AddEditBillScreen> {
               height: 52,
               child: FilledButton(
                 onPressed: _save,
-                child: Text(_isEdit ? 'Save changes' : 'Add bill'),
+                child: Text(
+                    _isEdit ? context.l10n.saveChanges : context.l10n.addBill),
               ),
             ),
           ],
