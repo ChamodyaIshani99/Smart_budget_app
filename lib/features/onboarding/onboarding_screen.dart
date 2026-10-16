@@ -6,6 +6,7 @@ import '../../core/constants/app_constants.dart';
 import '../../core/localization/l10n_ext.dart';
 import '../../core/localization/locale_provider.dart';
 import '../../core/services/notification_service.dart';
+import '../../core/theme/app_colors.dart';
 import '../bills/providers/bill_providers.dart';
 
 class OnboardingScreen extends ConsumerStatefulWidget {
@@ -107,13 +108,34 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 120, color: Theme.of(context).colorScheme.primary),
-            const SizedBox(height: 32),
-            Text(title,
-                style: Theme.of(context).textTheme.headlineSmall,
-                textAlign: TextAlign.center),
+            Container(
+              width: 180,
+              height: 180,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: AppColors.heroGradient(context),
+                boxShadow: AppColors.heroShadow,
+              ),
+              child: Icon(icon, size: 84, color: Colors.white),
+            ),
+            const SizedBox(height: 40),
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: Theme.of(context)
+                  .textTheme
+                  .headlineSmall
+                  ?.copyWith(fontWeight: FontWeight.w800),
+            ),
             const SizedBox(height: 12),
-            Text(body, textAlign: TextAlign.center),
+            Text(
+              body,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 16,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
           ],
         ),
       );

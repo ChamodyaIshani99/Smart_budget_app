@@ -7,6 +7,8 @@ import '../../core/utils/recurrence.dart';
 import '../../data/models/bill.dart';
 import '../../l10n/app_localizations.dart';
 import 'providers/bill_providers.dart';
+import '../../core/theme/app_colors.dart';
+import '../../core/widgets/ui_kit.dart';
 
 class BillDetailScreen extends ConsumerWidget {
   final int billId;
@@ -82,7 +84,6 @@ class BillDetailScreen extends ConsumerWidget {
     }
 
     final cat = categories.where((c) => c.id == bill.categoryId).firstOrNull;
-    final overdue = bill.dueDate.isBefore(dateOnly(DateTime.now()));
     final payments = ref.watch(paymentsForBillProvider(billId));
 
     return Scaffold(
@@ -98,37 +99,66 @@ class BillDetailScreen extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(20),
+          FadeSlideIn(
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(22),
+              decoration: BoxDecoration(
+                gradient: AppColors.heroGradient(context),
+                borderRadius: BorderRadius.circular(28),
+                boxShadow: AppColors.heroShadow,
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    formatMoney(bill.amount, bill.currency),
-                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    dueStatusText(context.l10n, bill.dueDate),
-                    style: TextStyle(
-                      color: overdue ? Colors.red : Colors.green.shade700,
-                      fontWeight: FontWeight.w600,
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      formatMoney(bill.amount, bill.currency),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 34,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
-                  const Divider(height: 28),
+                  const SizedBox(height: 12),
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.18),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      dueStatusText(context.l10n, bill.dueDate),
+                      style: const TextStyle(
+                          color: Colors.white, fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                children: [
                   _row(Icons.event, context.l10n.dueDate,
                       formatDate(bill.dueDate)),
                   _row(Icons.category, context.l10n.category,
                       cat?.nameFor(context.langCode) ?? '-'),
                   _row(Icons.repeat, context.l10n.repeat,
                       _recurrenceText(context.l10n, bill.recurrence)),
-                  _row(Icons.notifications, context.l10n.reminder,
-                      bill.reminderDays == 0
-                          ? context.l10n.onTheDueDate
-                          : context.l10n.daysBefore(bill.reminderDays)),
+                  _row(
+                    Icons.notifications,
+                    context.l10n.reminder,
+                    bill.reminderDays == 0
+                        ? context.l10n.onTheDueDate
+                        : context.l10n.daysBefore(bill.reminderDays),
+                  ),
                   if (bill.notes != null)
                     _row(Icons.notes, context.l10n.notes, bill.notes!),
                 ],
