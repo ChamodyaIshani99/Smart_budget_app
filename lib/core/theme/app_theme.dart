@@ -3,10 +3,13 @@ import 'package:flutter/material.dart';
 class AppTheme {
   static const Color seed = Color(0xFF1E88E5);
 
+  // Used only for characters the normal font lacks (i.e. Sinhala).
+  static const List<String> _fontFallback = ['NotoSansSinhala'];
+
   static ThemeData light = ThemeData(
     useMaterial3: true,
     colorScheme: ColorScheme.fromSeed(seedColor: seed),
-    fontFamily: 'NotoSansSinhala', // added in the localization phase
+    fontFamilyFallback: _fontFallback,
     appBarTheme: const AppBarTheme(centerTitle: true),
     inputDecorationTheme: InputDecorationTheme(
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
@@ -19,6 +22,6 @@ class AppTheme {
       seedColor: seed,
       brightness: Brightness.dark,
     ),
-    fontFamily: 'NotoSansSinhala',
+    fontFamilyFallback: _fontFallback,
   );
 }

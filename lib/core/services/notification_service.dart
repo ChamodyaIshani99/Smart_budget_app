@@ -9,6 +9,8 @@ import '../../data/models/bill.dart';
 import '../../data/repositories/bill_repository.dart';
 import '../constants/app_constants.dart';
 import '../utils/helpers.dart';
+import 'dart:ui' show Locale;
+import '../../l10n/app_localizations.dart';
 
 class NotificationService {
   NotificationService._();
@@ -59,6 +61,11 @@ class NotificationService {
     );
     _ready = true;
   }
+    Future<AppLocalizations> _l10n() async {
+    final prefs = await SharedPreferences.getInstance();
+    return lookupAppLocalizations(
+        Locale(prefs.getString(AppConstants.prefLanguage) ?? 'en'));
+  }
 
   // ---------- permission ----------
 
@@ -71,8 +78,7 @@ class NotificationService {
 
   // ---------- scheduling ----------
 
-  /// Cancels everything and re-creates reminders for all active bills.
-  Future<void> rescheduleAll() async {
+    Future<void> rescheduleAll() async {
     try {
       if (!_ready) await init();
 
@@ -80,17 +86,19 @@ class NotificationService {
       final hour = prefs.getInt(AppConstants.prefReminderHour) ?? 9;
       final minute = prefs.getInt(AppConstants.prefReminderMinute) ?? 0;
       final bills = await BillRepository().getAll();
+      final l10n = await _l10n();
 
       await _plugin.cancelAll();
       for (final bill in bills) {
-        await _scheduleForBill(bill, hour, minute);
+        await _scheduleForBill(bill, hour, minute, l10n);
       }
     } catch (e) {
       debugPrint('Reschedule failed: $e');
     }
   }
 
-  Future<void> _scheduleForBill(Bill bill, int hour, int minute) async {
+  Future<void> _scheduleForBill(
+      Bill bill, int hour, int minute, AppLocalizations l10n) async {
     final billId = bill.id;
     if (billId == null) return;
 
@@ -109,8 +117,8 @@ class NotificationService {
       await _schedule(
         id: billId * 3 + 2,
         billId: billId,
-        title: 'Overdue: ${bill.title}',
-        body: '$money was due on ${formatDate(due)}. Tap to mark it as paid.',
+        title: l10n.notifOverdueTitle(bill.title),
+        body: l10n.notifOverdueBody(money, formatDate(due)),
         when: next,
       );
       return;
@@ -121,9 +129,8 @@ class NotificationService {
       await _schedule(
         id: billId * 3,
         billId: billId,
-        title: 'Upcoming bill: ${bill.title}',
-        body: '$money is due in ${bill.reminderDays} '
-            'day${bill.reminderDays == 1 ? '' : 's'} (${formatDate(due)}).',
+        title: l10n.notifUpcomingTitle(bill.title),
+        body: l10n.notifUpcomingBody(money, bill.reminderDays, formatDate(due)),
         when: at(due.year, due.month, due.day - bill.reminderDays),
       );
     }
@@ -132,8 +139,8 @@ class NotificationService {
     await _schedule(
       id: billId * 3 + 1,
       billId: billId,
-      title: 'Bill due today: ${bill.title}',
-      body: '$money is due today.',
+      title: l10n.notifDueTodayTitle(bill.title),
+      body: l10n.notifDueTodayBody(money),
       when: at(due.year, due.month, due.day),
     );
   }
@@ -162,20 +169,26 @@ class NotificationService {
   Future<int> pendingCount() async =>
       (await _plugin.pendingNotificationRequests()).length;
 
-  Future<void> showTestNow() => _plugin.show(
-        id: 900001,
-        title: 'Test notification',
-        body: 'Notifications are working.',
-        notificationDetails: _details,
-      );
+    Future<void> showTestNow() async {
+    final l10n = await _l10n();
+    await _plugin.show(
+      id: 900001,
+      title: l10n.testNotifTitle,
+      body: l10n.testNotifBody,
+      notificationDetails: _details,
+    );
+  }
 
-  Future<void> scheduleTestInOneMinute() => _plugin.zonedSchedule(
-        id: 900002,
-        title: 'Scheduled test',
-        body: 'This reminder was scheduled one minute ago.',
-        scheduledDate:
-            tz.TZDateTime.now(tz.local).add(const Duration(minutes: 1)),
-        notificationDetails: _details,
-        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
-      );
+  Future<void> scheduleTestInOneMinute() async {
+    final l10n = await _l10n();
+    await _plugin.zonedSchedule(
+      id: 900002,
+      title: l10n.scheduledTestTitle,
+      body: l10n.scheduledTestBody,
+      scheduledDate:
+          tz.TZDateTime.now(tz.local).add(const Duration(minutes: 1)),
+      notificationDetails: _details,
+      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+    );
+  }
 }

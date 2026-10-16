@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../core/localization/l10n_ext.dart';
 import '../../core/utils/helpers.dart';
 import '../../data/models/bill.dart';
 import '../../data/models/category.dart';
@@ -20,11 +21,11 @@ class DashboardScreen extends ConsumerWidget {
     final scheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Smart Budget')),
+      appBar: AppBar(title: Text(context.l10n.appName)),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => context.push('/bills/add'),
         icon: const Icon(Icons.add),
-        label: const Text('Add bill'),
+        label: Text(context.l10n.addBill),
       ),
       body: billsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -38,7 +39,7 @@ class DashboardScreen extends ConsumerWidget {
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
             children: [
               _SummaryCard(
-                title: 'To pay this month',
+                title: context.l10n.toPayThisMonth,
                 totals: d.toPayThisMonth,
                 background: scheme.primaryContainer,
                 foreground: scheme.onPrimaryContainer,
@@ -50,7 +51,7 @@ class DashboardScreen extends ConsumerWidget {
                 children: [
                   Expanded(
                     child: _SummaryCard(
-                      title: 'Overdue',
+                      title: context.l10n.overdue,
                       totals: d.overdueTotals,
                       background: d.overdue.isEmpty
                           ? scheme.surfaceContainerHighest
@@ -63,7 +64,7 @@ class DashboardScreen extends ConsumerWidget {
                   const SizedBox(width: 12),
                   Expanded(
                     child: _SummaryCard(
-                      title: 'Paid this month',
+                      title: context.l10n.paidThisMonth,
                       totals: paid,
                       background: scheme.tertiaryContainer,
                       foreground: scheme.onTertiaryContainer,
@@ -72,16 +73,16 @@ class DashboardScreen extends ConsumerWidget {
                 ],
               ),
               if (d.overdue.isNotEmpty) ...[
-                _SectionHeader('Overdue', d.overdue.length),
+                _SectionHeader(context.l10n.overdue, d.overdue.length),
                 for (final b in d.overdue)
                   _DueTile(
                       bill: b, category: catById[b.categoryId], overdue: true),
               ],
-              _SectionHeader('Upcoming (next 30 days)', d.upcoming.length),
+              _SectionHeader(context.l10n.upcomingNext30, d.upcoming.length),
               if (d.upcoming.isEmpty)
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 16),
-                  child: Text('Nothing due in the next 30 days.'),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  child: Text(context.l10n.nothingDue30),
                 )
               else
                 for (final b in d.upcoming)
@@ -109,18 +110,18 @@ class _EmptyState extends StatelessWidget {
             Icon(Icons.receipt_long,
                 size: 96, color: Theme.of(context).colorScheme.primary),
             const SizedBox(height: 16),
-            Text('No bills yet',
+            Text(context.l10n.noBillsTitle,
                 style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 8),
-            const Text(
-              'Add your first bill and we will remind you before it is due.',
+            Text(
+              context.l10n.noBillsDashBody,
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
             FilledButton.icon(
               onPressed: () => context.push('/bills/add'),
               icon: const Icon(Icons.add),
-              label: const Text('Add your first bill'),
+              label: Text(context.l10n.addFirstBill),
             ),
           ],
         ),
@@ -222,7 +223,7 @@ class _DueTile extends StatelessWidget {
         title: Text(bill.title,
             style: const TextStyle(fontWeight: FontWeight.w600)),
         subtitle: Text(
-          '${dueStatusText(bill.dueDate)} • ${formatDate(bill.dueDate)}',
+          '${dueStatusText(context.l10n, bill.dueDate)} • ${formatDate(bill.dueDate)}',
           style: TextStyle(color: overdue ? Colors.red : null),
         ),
         trailing: Text(

@@ -1,19 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../core/localization/l10n_ext.dart';
 import '../../core/utils/helpers.dart';
 import '../../core/utils/recurrence.dart';
 import '../../data/models/bill.dart';
+import '../../l10n/app_localizations.dart';
 import 'providers/bill_providers.dart';
 
 class BillDetailScreen extends ConsumerWidget {
   final int billId;
   const BillDetailScreen({super.key, required this.billId});
 
-  String _recurrenceText(Recurrence r) => switch (r) {
-        Recurrence.none => 'One-time',
-        Recurrence.monthly => 'Monthly',
-        Recurrence.yearly => 'Yearly',
+  String _recurrenceText(AppLocalizations l10n, Recurrence r) => switch (r) {
+        Recurrence.none => l10n.oneTime,
+        Recurrence.monthly => l10n.monthly,
+        Recurrence.yearly => l10n.yearly,
       };
 
   Future<void> _markPaid(
@@ -22,19 +24,19 @@ class BillDetailScreen extends ConsumerWidget {
     final amount = await showDialog<double>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Mark as paid'),
+        title: Text(context.l10n.markAsPaid),
         content: TextField(
           controller: controller,
           autofocus: true,
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
           decoration: InputDecoration(
-            labelText: 'Amount paid (${bill.currency})',
+            labelText: context.l10n.amountPaidLabel(bill.currency),
           ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
+            child: Text(context.l10n.cancel),
           ),
           FilledButton(
             onPressed: () {
@@ -43,7 +45,7 @@ class BillDetailScreen extends ConsumerWidget {
               if (v == null || v <= 0) return;
               Navigator.pop(ctx, v);
             },
-            child: const Text('Confirm'),
+            child: Text(context.l10n.confirm),
           ),
         ],
       ),
@@ -56,8 +58,9 @@ class BillDetailScreen extends ConsumerWidget {
     final oneTime = bill.recurrence == Recurrence.none;
     final next = nextDueDate(bill.dueDate, bill.recurrence, bill.anchorDay);
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(
-          oneTime ? 'Bill marked as paid' : 'Paid. Next due ${formatDate(next)}'),
+      content: Text(oneTime
+          ? context.l10n.billMarkedPaid
+          : context.l10n.paidNextDue(formatDate(next))),
     ));
     if (oneTime) context.pop();
   }
@@ -109,21 +112,25 @@ class BillDetailScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    dueStatusText(bill.dueDate),
+                    dueStatusText(context.l10n, bill.dueDate),
                     style: TextStyle(
                       color: overdue ? Colors.red : Colors.green.shade700,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
                   const Divider(height: 28),
-                  _row(Icons.event, 'Due date', formatDate(bill.dueDate)),
-                  _row(Icons.category, 'Category', cat?.nameEn ?? '-'),
-                  _row(Icons.repeat, 'Repeat', _recurrenceText(bill.recurrence)),
-                  _row(Icons.notifications, 'Reminder',
+                  _row(Icons.event, context.l10n.dueDate,
+                      formatDate(bill.dueDate)),
+                  _row(Icons.category, context.l10n.category,
+                      cat?.nameFor(context.langCode) ?? '-'),
+                  _row(Icons.repeat, context.l10n.repeat,
+                      _recurrenceText(context.l10n, bill.recurrence)),
+                  _row(Icons.notifications, context.l10n.reminder,
                       bill.reminderDays == 0
-                          ? 'On the due date'
-                          : '${bill.reminderDays} day(s) before'),
-                  if (bill.notes != null) _row(Icons.notes, 'Notes', bill.notes!),
+                          ? context.l10n.onTheDueDate
+                          : context.l10n.daysBefore(bill.reminderDays)),
+                  if (bill.notes != null)
+                    _row(Icons.notes, context.l10n.notes, bill.notes!),
                 ],
               ),
             ),
@@ -134,11 +141,11 @@ class BillDetailScreen extends ConsumerWidget {
             child: FilledButton.icon(
               onPressed: () => _markPaid(context, ref, bill),
               icon: const Icon(Icons.check_circle),
-              label: const Text('Mark as paid'),
+              label: Text(context.l10n.markAsPaid),
             ),
           ),
           const SizedBox(height: 24),
-          Text('Payment history',
+          Text(context.l10n.paymentHistory,
               style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 8),
           payments.when(
@@ -146,9 +153,9 @@ class BillDetailScreen extends ConsumerWidget {
             error: (e, _) => Text('Error: $e'),
             data: (list) {
               if (list.isEmpty) {
-                return const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 16),
-                  child: Text('No payments yet.'),
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  child: Text(context.l10n.noPaymentsTitle),
                 );
               }
               return Column(
@@ -159,10 +166,10 @@ class BillDetailScreen extends ConsumerWidget {
                         leading: const Icon(Icons.check_circle,
                             color: Colors.green),
                         title: Text(formatMoney(p.amountPaid, p.currency)),
-                        subtitle: Text(
-                          'Paid ${formatDate(p.paidDate)} '
-                          '• for ${formatDate(p.dueDateCovered)}',
-                        ),
+                        subtitle: Text(context.l10n.paidOnFor(
+                          formatDate(p.paidDate),
+                          formatDate(p.dueDateCovered),
+                        )),
                       ),
                     ),
                 ],

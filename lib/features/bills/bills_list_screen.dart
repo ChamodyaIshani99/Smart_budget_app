@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../core/localization/l10n_ext.dart';
 import '../../core/utils/helpers.dart';
 import '../../data/models/bill.dart';
 import 'providers/bill_providers.dart';
@@ -12,16 +13,16 @@ class BillsListScreen extends ConsumerWidget {
     final result = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Delete bill?'),
-        content: const Text('This will also remove its payment history.'),
+        title: Text(context.l10n.deleteBillTitle),
+        content: Text(context.l10n.deleteBillBody),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
+            child: Text(context.l10n.cancel),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Delete'),
+            child: Text(context.l10n.delete),
           ),
         ],
       ),
@@ -37,25 +38,22 @@ class BillsListScreen extends ConsumerWidget {
     final today = dateOnly(DateTime.now());
 
     return Scaffold(
-      appBar: AppBar(title: const Text('My Bills')),
-      
+      appBar: AppBar(title: Text(context.l10n.myBills)),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => context.push('/bills/add'),
         icon: const Icon(Icons.add),
-        label: const Text('Add bill'),
+        label: Text(context.l10n.addBill),
       ),
       body: billsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('Error: $e')),
         data: (bills) {
           if (bills.isEmpty) {
-            return const Center(
+            return Center(
               child: Padding(
-                padding: EdgeInsets.all(32),
-                child: Text(
-                  'No bills yet.\nTap "Add bill" to create your first one.',
-                  textAlign: TextAlign.center,
-                ),
+                padding: const EdgeInsets.all(32),
+                child: Text(context.l10n.noBillsBody,
+                    textAlign: TextAlign.center),
               ),
             );
           }
@@ -68,7 +66,7 @@ class BillsListScreen extends ConsumerWidget {
               final overdue = bill.dueDate.isBefore(today);
               return _BillTile(
                 bill: bill,
-                categoryName: cat?.nameEn ?? '',
+                categoryName: cat?.nameFor(context.langCode) ?? '',
                 icon: categoryIcon(cat?.icon ?? 'more'),
                 color: Color(cat?.color ?? 0xFF757575),
                 overdue: overdue,
@@ -133,7 +131,7 @@ class _BillTile extends StatelessWidget {
           title: Text(bill.title,
               style: const TextStyle(fontWeight: FontWeight.w600)),
           subtitle: Text(
-            '${overdue ? 'Overdue' : 'Due'} ${formatDate(bill.dueDate)}'
+            '${overdue ? context.l10n.overdueSince(formatDate(bill.dueDate)) : context.l10n.dueOn(formatDate(bill.dueDate))}'
             ' • $categoryName',
             style: TextStyle(color: overdue ? Colors.red : null),
           ),
