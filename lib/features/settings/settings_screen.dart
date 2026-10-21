@@ -8,6 +8,7 @@ import '../../core/localization/locale_provider.dart';
 import '../../core/services/notification_service.dart';
 import '../../data/database/debug_seed.dart';
 import '../bills/providers/bill_providers.dart';
+import '../../core/theme/theme_provider.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -124,6 +125,34 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               ),
             ),
           ),
+
+                    const SizedBox(height: 24),
+          Text(l10n.appearance, style: titleStyle),
+          const SizedBox(height: 8),
+          SegmentedButton<ThemeMode>(
+            showSelectedIcon: false,
+            segments: [
+              ButtonSegment(
+                value: ThemeMode.system,
+                icon: const Icon(Icons.brightness_auto),
+                label: Text(l10n.themeSystem),
+              ),
+              ButtonSegment(
+                value: ThemeMode.light,
+                icon: const Icon(Icons.light_mode_outlined),
+                label: Text(l10n.themeLight),
+              ),
+              ButtonSegment(
+                value: ThemeMode.dark,
+                icon: const Icon(Icons.dark_mode_outlined),
+                label: Text(l10n.themeDark),
+              ),
+            ],
+            selected: {ref.watch(themeModeProvider)},
+            onSelectionChanged: (s) =>
+                ref.read(themeModeProvider.notifier).set(s.first),
+          ),
+          
           const SizedBox(height: 24),
           Text(l10n.reminders, style: titleStyle),
           const SizedBox(height: 8),

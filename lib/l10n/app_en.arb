@@ -119,5 +119,18 @@
   "testNotifTitle": "Test notification",
   "testNotifBody": "Notifications are working.",
   "scheduledTestTitle": "Scheduled test",
-  "scheduledTestBody": "This reminder was scheduled one minute ago."
+  "scheduledTestBody": "This reminder was scheduled one minute ago.",
+
+  "greetingMorning": "Good morning",
+  "greetingAfternoon": "Good afternoon",
+  "greetingEvening": "Good evening",
+  "greetingOverdue": "{count, plural, =1{1 bill needs your attention} other{{count} bills need your attention}}",
+  "@greetingOverdue": { "placeholders": { "count": { "type": "int" } } },
+  "greetingUpcoming": "{count, plural, =1{1 bill due in the next 30 days} other{{count} bills due in the next 30 days}}",
+  "@greetingUpcoming": { "placeholders": { "count": { "type": "int" } } },
+  "greetingAllClear": "You are all caught up",
+  "appearance": "Appearance",
+  "themeSystem": "System",
+  "themeLight": "Light",
+  "themeDark": "Dark"
 }

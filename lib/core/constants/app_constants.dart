@@ -8,6 +8,7 @@ class AppConstants {
   static const String prefDefaultCurrency = 'default_currency';
   static const String prefReminderHour = 'reminder_hour';
   static const String prefReminderMinute = 'reminder_minute';
+  static const String prefThemeMode = 'theme_mode';
 
   static const List<String> currencies = [
     'LKR', 'USD', 'EUR', 'GBP', 'INR', 'AUD', 'CAD', 'AED', 'SGD', 'JPY',

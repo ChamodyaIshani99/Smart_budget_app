@@ -347,4 +347,50 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get scheduledTestBody => 'This reminder was scheduled one minute ago.';
+
+  @override
+  String get greetingMorning => 'Good morning';
+
+  @override
+  String get greetingAfternoon => 'Good afternoon';
+
+  @override
+  String get greetingEvening => 'Good evening';
+
+  @override
+  String greetingOverdue(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count bills need your attention',
+      one: '1 bill needs your attention',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String greetingUpcoming(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count bills due in the next 30 days',
+      one: '1 bill due in the next 30 days',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get greetingAllClear => 'You are all caught up';
+
+  @override
+  String get appearance => 'Appearance';
+
+  @override
+  String get themeSystem => 'System';
+
+  @override
+  String get themeLight => 'Light';
+
+  @override
+  String get themeDark => 'Dark';
 }

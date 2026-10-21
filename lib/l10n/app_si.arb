@@ -102,5 +102,16 @@
   "testNotifTitle": "පරීක්ෂණ දැනුම්දීම",
   "testNotifBody": "දැනුම්දීම් නිවැරදිව ක්‍රියා කරයි.",
   "scheduledTestTitle": "උපලේඛනගත පරීක්ෂණය",
-  "scheduledTestBody": "මෙම මතක් කිරීම මිනිත්තුවකට පෙර උපලේඛනගත කරන ලදී."
+  "scheduledTestBody": "මෙම මතක් කිරීම මිනිත්තුවකට පෙර උපලේඛනගත කරන ලදී.",
+
+  "greetingMorning": "සුභ උදෑසනක්",
+  "greetingAfternoon": "සුභ දහවලක්",
+  "greetingEvening": "සුභ සන්ධ්‍යාවක්",
+  "greetingOverdue": "ඔබේ අවධානය අවශ්‍ය බිල්පත් {count}ක්",
+  "greetingUpcoming": "ඉදිරි දින 30 තුළ ගෙවිය යුතු බිල්පත් {count}ක්",
+  "greetingAllClear": "සියල්ල යාවත්කාලීනයි",
+  "appearance": "පෙනුම",
+  "themeSystem": "පද්ධතිය",
+  "themeLight": "ආලෝක",
+  "themeDark": "අඳුරු"
 }
