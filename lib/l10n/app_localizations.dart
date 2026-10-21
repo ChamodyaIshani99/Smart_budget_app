@@ -649,6 +649,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This reminder was scheduled one minute ago.'**
   String get scheduledTestBody;
+
+  /// No description provided for @greetingMorning.
+  ///
+  /// In en, this message translates to:
+  /// **'Good morning'**
+  String get greetingMorning;
+
+  /// No description provided for @greetingAfternoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Good afternoon'**
+  String get greetingAfternoon;
+
+  /// No description provided for @greetingEvening.
+  ///
+  /// In en, this message translates to:
+  /// **'Good evening'**
+  String get greetingEvening;
+
+  /// No description provided for @greetingOverdue.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 bill needs your attention} other{{count} bills need your attention}}'**
+  String greetingOverdue(int count);
+
+  /// No description provided for @greetingUpcoming.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 bill due in the next 30 days} other{{count} bills due in the next 30 days}}'**
+  String greetingUpcoming(int count);
+
+  /// No description provided for @greetingAllClear.
+  ///
+  /// In en, this message translates to:
+  /// **'You are all caught up'**
+  String get greetingAllClear;
+
+  /// No description provided for @appearance.
+  ///
+  /// In en, this message translates to:
+  /// **'Appearance'**
+  String get appearance;
+
+  /// No description provided for @themeSystem.
+  ///
+  /// In en, this message translates to:
+  /// **'System'**
+  String get themeSystem;
+
+  /// No description provided for @themeLight.
+  ///
+  /// In en, this message translates to:
+  /// **'Light'**
+  String get themeLight;
+
+  /// No description provided for @themeDark.
+  ///
+  /// In en, this message translates to:
+  /// **'Dark'**
+  String get themeDark;
 }
 
 class _AppLocalizationsDelegate

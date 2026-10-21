@@ -8,6 +8,7 @@ import '../../core/widgets/ui_kit.dart';
 import '../bills/providers/bill_providers.dart';
 import '../bills/widgets/bill_card.dart';
 import 'dashboard_data.dart';
+import 'greeting_header.dart';
 
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
@@ -22,7 +23,7 @@ class DashboardScreen extends ConsumerWidget {
     final catById = {for (final c in categories) c.id!: c};
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.appName)),
+      appBar: AppBar(toolbarHeight: 0), 
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => context.push('/bills/add'),
         icon: const Icon(Icons.add),
@@ -56,6 +57,13 @@ class DashboardScreen extends ConsumerWidget {
           return ListView(
             padding: const EdgeInsets.fromLTRB(16, 4, 16, 100),
             children: [
+              FadeSlideIn(
+                child: GreetingHeader(
+                  overdueCount: d.overdue.length,
+                  upcomingCount: d.upcoming.length,
+                ),
+              ),
+              
               FadeSlideIn(
                 child: _HeroCard(
                   toPay: d.toPayThisMonth,

@@ -325,4 +325,38 @@ class AppLocalizationsSi extends AppLocalizations {
   @override
   String get scheduledTestBody =>
       'මෙම මතක් කිරීම මිනිත්තුවකට පෙර උපලේඛනගත කරන ලදී.';
+
+  @override
+  String get greetingMorning => 'සුභ උදෑසනක්';
+
+  @override
+  String get greetingAfternoon => 'සුභ දහවලක්';
+
+  @override
+  String get greetingEvening => 'සුභ සන්ධ්‍යාවක්';
+
+  @override
+  String greetingOverdue(int count) {
+    return 'ඔබේ අවධානය අවශ්‍ය බිල්පත් $countක්';
+  }
+
+  @override
+  String greetingUpcoming(int count) {
+    return 'ඉදිරි දින 30 තුළ ගෙවිය යුතු බිල්පත් $countක්';
+  }
+
+  @override
+  String get greetingAllClear => 'සියල්ල යාවත්කාලීනයි';
+
+  @override
+  String get appearance => 'පෙනුම';
+
+  @override
+  String get themeSystem => 'පද්ධතිය';
+
+  @override
+  String get themeLight => 'ආලෝක';
+
+  @override
+  String get themeDark => 'අඳුරු';
 }
