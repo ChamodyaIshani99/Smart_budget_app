@@ -23,17 +23,17 @@ People often forget due dates for electricity, water and loan installments, whic
 
 | Splash | Onboarding | Dashboard |
 |:---:|:---:|:---:|
-| ![Splash](docs/screenshots/01-splash.png) | ![Onboarding](docs/screenshots/02-onboarding.png) | ![Dashboard](docs/screenshots/03-dashboard.png) |
+| ![Splash](docs/screenshots/01-splash.jpg) | ![Onboarding](docs/screenshots/02-onboarding.png) | ![Dashboard](docs/screenshots/03-dashboard.jpg) |
 
 | Bills | Bill detail | Add bill |
 |:---:|:---:|:---:|
-| ![Bills](docs/screenshots/04-bills.png) | ![Bill detail](docs/screenshots/05-bill-detail.png) | ![Add bill](docs/screenshots/06-add-bill.png) |
+| ![Bills](docs/screenshots/04-bills.jpg) | ![Bill detail](docs/screenshots/05-bill-detail.jpg) | ![Add bill](docs/screenshots/06-add-bill.jpg) |
 
 | Reports | Sinhala | Dark mode |
 |:---:|:---:|:---:|
-| ![Reports](docs/screenshots/07-reports.png) | ![Sinhala](docs/screenshots/08-sinhala.png) | ![Dark mode](docs/screenshots/09-dark.png) |
+| ![Reports](docs/screenshots/07-reports.jpg) | ![Sinhala](docs/screenshots/08-sinhala.jpg) | ![Dark mode](docs/screenshots/09-dark.jpg) |
 
-**Demo video:** _add your YouTube or LinkedIn link here_
+**Demo video:** _https://youtube.com/shorts/X49MTqbcBFM_
 
 ## Features
 
