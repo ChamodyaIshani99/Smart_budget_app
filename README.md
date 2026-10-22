@@ -19,7 +19,7 @@ People often forget due dates for electricity, water and loan installments, whic
 
 ## Screenshots
 
-> Add your screenshots to `docs/screenshots/` and keep the file names below (or edit the paths).
+>
 
 | Splash | Onboarding | Dashboard |
 |:---:|:---:|:---:|
