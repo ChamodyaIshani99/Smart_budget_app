@@ -31,7 +31,7 @@ People often forget due dates for electricity, water and loan installments, whic
 
 | Reports | Sinhala | Dark mode |
 |:---:|:---:|:---:|
-| ![Reports](docs/screenshots/07-reports.jpg) | ![Sinhala](docs/screenshots/08-sinhala.jpg) | ![Dark mode](docs/screenshots/09-dark.jpg) |
+| ![Reports](docs/screenshots/07-reports.jpg) | ![Sinhala](docs/screenshots/08-sinhala.jpg) | ![Light mode](docs/screenshots/09-dark.jpg) |
 
 **Demo video:** _https://youtube.com/shorts/X49MTqbcBFM_
 
